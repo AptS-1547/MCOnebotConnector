@@ -1,0 +1,28 @@
+# Here is your Onebot v11 websocket link
+connectAddress: "ws://127.0.0.1:3001/"
+
+# Here is your Onebot v11 access token
+accessToken: "asfafa"
+
+# Here is your Group ID that you want to listen to and send messages to which server or all servers
+serverList:
+  - groupId: 123456789
+    serverName: "all"
+  - groupId: 123456789
+    serverName: "server1"
+  - groupId: 123456789
+    serverName: "server2"
+
+# Here is your perfix for commands
+prefixMc: "!say"
+
+prefixOnebot: "!say"
+
+# Sending format from Minecraft to Onebot
+# {playerName} is the player name
+# {message} is the message
+# {serverName} is the server name
+
+# Here is the format for sending messages from Minecraft to Onebot
+sendFormatFromMC: "{playerName} say: {message}"
+sendFormatFromOnebot: "{playerName} say: {message}"

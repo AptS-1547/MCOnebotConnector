@@ -1,0 +1,77 @@
+plugins {
+    id 'java'
+    id 'eclipse'
+    id "org.jetbrains.gradle.plugin.idea-ext" version "1.0.1"
+    id "xyz.jpenilla.run-velocity" version "2.3.1"
+    id 'com.gradleup.shadow' version '9.0.0-beta4'
+}
+
+group = 'net.esaps'
+version = '0.0.1-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+    maven {
+        name = "papermc-repo"
+        url = "https://repo.papermc.io/repository/maven-public/"
+    }
+}
+
+dependencies {
+    implementation "com.esotericsoftware.yamlbeans:yamlbeans:1.17"
+
+    implementation 'org.java-websocket:Java-WebSocket:1.6.0'
+
+    implementation 'org.json:json:20210307'
+
+compileOnly "com.velocitypowered:velocity-api:3.4.0-SNAPSHOT"
+    annotationProcessor "com.velocitypowered:velocity-api:3.4.0-SNAPSHOT"
+
+compileOnly("org.projectlombok:lombok:1.18.30")
+    annotationProcessor 'org.projectlombok:lombok:1.18.30'
+}
+
+def targetJavaVersion = 17
+java {
+    def javaVersion = JavaVersion.toVersion(targetJavaVersion)
+    sourceCompatibility = javaVersion
+    targetCompatibility = javaVersion
+    if (JavaVersion.current() < javaVersion) {
+        toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+
+    if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
+        options.release.set(targetJavaVersion)
+    }
+}
+
+tasks {
+    runVelocity {
+        // Configure the Velocity version for our task.
+        // This is the only required configuration besides applying the plugin.
+        // Your plugin's jar (or shadowJar if present) will be used automatically.
+        velocityVersion("3.4.0-SNAPSHOT")
+    }
+}
+
+def templateSource = file('src/main/templates')
+def templateDest = layout.buildDirectory.dir('generated/sources/templates')
+def generateTemplates = tasks.register('generateTemplates', Copy) { task ->
+    def props = [
+            'version': project.version
+    ]
+    task.inputs.properties props
+
+    task.from templateSource
+    task.into templateDest
+    task.expand props
+}
+
+sourceSets.main.java.srcDir(generateTemplates.map { it.outputs })
+
+rootProject.idea.project.settings.taskTriggers.afterSync generateTemplates
+project.eclipse.synchronizationTasks(generateTemplates)
